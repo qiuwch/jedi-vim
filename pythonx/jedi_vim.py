@@ -214,6 +214,17 @@ def _check_jedi_availability(show_error=False):
 current_environment = (None, None)
 
 
+def get_environment_by_path(python_path):
+    # List all environments, select using path
+    envs = jedi.find_system_environments()
+    global current_environment
+
+    for env in envs:
+        if env.path == os.path.expanduser(python_path):
+            current_environment = ('auto', env)
+            return env
+
+
 def get_environment(use_cache=True):
     global current_environment
 
@@ -222,6 +233,11 @@ def get_environment(use_cache=True):
         return current_environment[1]
 
     environment = None
+
+    python_path = vim_eval("g:jedi#force_py_path")
+    if python_path != "":
+        return get_environment_by_path(python_path)
+
     if vim_force_python_version == "auto":
         environment = jedi.api.environment.get_cached_default_environment()
     else:
